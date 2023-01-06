@@ -6,6 +6,7 @@ from io import BytesIO
 url = "https://card-generator.onrender.com/api/template/"
 
 # Coordinates for writing text on the image
+# Each template image has its own coordinates for the text "to" and "from"
 coordinates = {
     "1.jpg": {
         "to": (170, 560),
@@ -34,20 +35,22 @@ coordinates = {
 }
 
 
-def create_card(data):
-    # Get template image
+def create_card(data, user_id):
+    # Get template image from URL
     template = data['template']
     response = requests.get(url+template)
+    # Open image using the content from the response
     image = Image.open(BytesIO(response.content))
 
     # Create ImageDraw and ImageFont objects
     draw = ImageDraw.Draw(image)
     font = ImageFont.truetype("fonts/arial.ttf", 35)
 
-    # Write text on image
+    # Write text on image using the coordinates for the current template
     draw.text(coordinates[template]['to'], data['receiver_name'], font=font, fill=(0, 0, 0))
     draw.text(coordinates[template]['from'], data['sender_name'], font=font, fill=(0, 0, 0))
 
     # Save modified image
-    image.save("image_with_text.jpg")
-    return "image_with_text.jpg"
+    filename = f"{user_id}.jpg"
+    image.save(filename)
+    return filename
